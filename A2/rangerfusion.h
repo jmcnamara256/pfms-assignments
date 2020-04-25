@@ -7,6 +7,26 @@
 #include "rangerinterface.h"
 #include "vector2.h"
 
+// Define a line as a start and end point
+/**
+ * @brief A 2d line, defined by 2 points (Vector2).
+ * 
+ */
+struct line {
+  Vector2 A;
+  Vector2 B;
+};
+
+
+// The 'centre' reference for sensors is offset from zero angle (positive x axis)
+const double ANGULAR_OFFSET = 90.0;
+const int CELL_NUM_SIDES = 4;
+
+
+/**
+ * @brief Generates the fusion of rangers(sensors) and cells.
+ * 
+ */
 class RangerFusion: public RangerFusionInterface
 {
 public:
@@ -44,11 +64,12 @@ private:
   bool lineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4);
   
   // Utility functions
-  void getCellEdge(Cell * c, int side, Vector2& p1, Vector2& p2);
-  Vector2 getCellVertex(Cell * c, int vertex);
+  std::vector<line> getCellEdge(Cell * c);
+  std::vector<Vector2> getCellVertex(Cell * c);
   void triangleToVertex(double range, double theta, double fov,  Vector2& A, Vector2& B, Vector2& C);
   void lineToVertex(double range, double theta, Vector2& A, Vector2& B);
   void wrapAngle(double& theta);
 };
+
 
 #endif // RANGERFUSION_H

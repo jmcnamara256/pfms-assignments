@@ -8,6 +8,11 @@
 // The RangerFusionInterface is a class which specifies the minimum
 // required interface for your RangerFusion class your ranger fusion
 // class must inherit from it
+
+/**
+ * @brief Specifies the minimum functionality for the RangerFusion Class.
+ * 
+ */
 class RangerFusionInterface
 {
 public:

@@ -13,6 +13,11 @@ const unsigned int SONAR_OFFSET = 0;
 const std::string SONAR_MODEL = "SN-001";
 const SensingMethod SONAR_SENSOR_TYPE = CONE;
 
+
+/**
+ * @brief A Sonar sensor type.
+ * 
+ */
 class Sonar: public Ranger
 {
 public:

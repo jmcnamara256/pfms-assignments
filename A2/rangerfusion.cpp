@@ -1,9 +1,11 @@
 #include "rangerfusion.h"
-#include <iostream>
 
-RangerFusion::RangerFusion() {
 
-}
+/**
+ * @brief Construct a new Ranger Fusion:: Ranger Fusion object
+ * 
+ */
+RangerFusion::RangerFusion() {};
 
 /**
  * @brief Sets the list of sensors.
@@ -84,7 +86,7 @@ void RangerFusion::grabAndFuseData() {
             if((*it_r)->getSensingMethod() == CONE) {
                 // Angle for the centre of the sensor
                 // Relative to 0 (positive x-axis)
-                double theta = 90 + (*it_r)->getOffset();
+                double theta = ANGULAR_OFFSET + (*it_r)->getOffset();
                 double fov = (*it_r)->getFieldOfView();
 
                 // Because data and rangers have equal number of elements, we can access both with our counter i
@@ -115,7 +117,7 @@ void RangerFusion::grabAndFuseData() {
 
 
                     // The angle of the current beam relative to zero (+ve x-axis)
-                    double theta = 90 + (*it_r)->getOffset() - (*it_r)->getFieldOfView() * 0.5 + (*it_r)->getAngularResolution() * j;
+                    double theta = ANGULAR_OFFSET + (*it_r)->getOffset() - (*it_r)->getFieldOfView() * 0.5 + int((*it_r)->getAngularResolution()) * j;
 
                     // Get the start/end of the beam
                     Vector2 A,B;
@@ -133,20 +135,21 @@ void RangerFusion::grabAndFuseData() {
                     
                     // The other case is free, where the cell intersects the line
                     // Check each edge of the cell with the beam
-                    for(int i = 0; i < 4; ++i) {
-                        Vector2 C, D;
+                    for(auto edge : getCellEdge(cell)) {
 
-                        // Get one edge of the cell (CD)
-                        getCellEdge(cell, i, C, D);
-                        
-                        // If the beam intersects edge CD
-                        if(lineIntersection(A, B, C, D)) {
+                        // If the beam intersects edge
+                        if(lineIntersection(A, B, edge.A, edge.B)) {
                             cell->setState(FREE);
 
                             // If there is an intersection, we dont need to test any more edges of the cell
                             break;
                         }
                     }
+
+
+
+
+
                 }
             }
         }
@@ -260,14 +263,9 @@ bool RangerFusion::cellIntersectCone(Cell * c, Vector2 A, Vector2 B, Vector2 C) 
     
     // Test hit case first
     // Check each cell edge with the BC (sensing) edge of the sonar triangle
-    for(int i = 0; i < 4; ++i) {
-        
-        // Get single cell edge
-        Vector2 p1,p2;
-        getCellEdge(c, i, p1, p2);
-
+    for(auto edge : getCellEdge(c)) {
         // Check if sonar sensing line intersects
-        if(lineIntersection(p1, p2, B, C)) {
+        if(lineIntersection(edge.A, edge.B, B, C)) {
             c->setState(OCCUPIED);
             return true;
         }
@@ -281,15 +279,10 @@ bool RangerFusion::cellIntersectCone(Cell * c, Vector2 A, Vector2 B, Vector2 C) 
         return true;
     }
 
-    // check for intersection between cell edges and AC/AB 
-    for(int i = 0; i < 4; ++i) {
-
-        // Get single cell edge
-        Vector2 p1,p2;
-        getCellEdge(c, i, p1, p2);
-
+    // check for intersection between cell edges and AC/AB
+    for(auto edge : getCellEdge(c)) {
         // If the cell edge intersects either side of the sonar cone
-        if(lineIntersection(p1, p2, A, B) || lineIntersection(p1, p2, A, C)) {
+        if(lineIntersection(edge.A, edge.B, A, B) || lineIntersection(edge.A, edge.B, A, C)) {
             c->setState(FREE);
             return true;
         }
@@ -297,14 +290,13 @@ bool RangerFusion::cellIntersectCone(Cell * c, Vector2 A, Vector2 B, Vector2 C) 
 
     // Check if any cell verticies are contained within the triangle
     // This check applies to the case where the cell is fully contained in the sonar cone
-    for(int i = 0; i < 4; ++i) {
-        Vector2 vertex = getCellVertex(c, i);
-        
+    for(auto vertex : getCellVertex(c)) {
         if(pointInTriangle(vertex, A, B, C)) {
             c->setState(FREE);
             return true;
         }
     }
+
     return false;
 }
 
@@ -355,45 +347,39 @@ bool RangerFusion::pointInTriangle(Vector2 P, Vector2 A, Vector2 B, Vector2 C) {
  * @param p1 End point 1.
  * @param p2 End point 2.
  */
-void RangerFusion::getCellEdge(Cell * c, int side, Vector2& p1, Vector2& p2) {
-    double xc, yc, s;
-    c->getCentre(xc, yc);
-    s = c->getSide() * 0.5;
+std::vector<line> RangerFusion::getCellEdge(Cell * c) {
+    
+    // container
+    std::vector<line> edges;
 
-    switch(side) {
-        case 0: {
-            p1.x = xc + s;
-            p1.y = yc + s;
-            p2.x = xc + s;
-            p2.y = yc - s;
-            break;
-        }
-        case 1: {
-            p1.x = xc + s;
-            p1.y = yc - s;
-            p2.x = xc - s;
-            p2.y = yc - s;
-            break;
-        }
-        case 2: {
-            p1.x = xc - s;
-            p1.y = yc - s;
-            p2.x = xc - s;
-            p2.y = yc + s;
-            break;
-        }
-        case 3: {
-            p1.x = xc - s;
-            p1.y = yc + s;
-            p2.x = xc + s;
-            p2.y = yc + s;
-            break;
-        }
-        default: {
-            p1 = Vector2::zero();
-            p2 = Vector2::zero();
-        }
-    }
+    // 4 Corners
+    Vector2 p1, p2, p3, p4;
+
+    // Center of cell
+    double xc, yc, half_side;
+    c->getCentre(xc, yc);
+
+    half_side = c->getSide() * 0.5;
+
+    // Top right
+    p1.x = xc + half_side;
+    p1.y = yc + half_side;
+   
+    // Bottom right
+    p2.x = p1.x;
+    p2.y = yc - half_side;
+    
+    // Bottom left
+    p3.x = xc - half_side;
+    p3.y = p2.y;
+
+    // Top left
+    p4.x = p3.x;
+    p4.y = p1.y;
+
+    edges = {{p1, p2}, {p2, p3}, {p3, p4}, {p4, p1}};
+
+    return edges;
 }
 
 /**
@@ -403,38 +389,39 @@ void RangerFusion::getCellEdge(Cell * c, int side, Vector2& p1, Vector2& p2) {
  * @param vertex Vertex, from top right proceeding counter-clockwise.
  * @return Vector2 
  */
-Vector2 RangerFusion::getCellVertex(Cell * c, int vertex) {
-    Vector2 vert;
-    double xc, yc, s;
-    c->getCentre(xc, yc);
-    s = c->getSide() * 0.5;
+std::vector<Vector2> RangerFusion::getCellVertex(Cell * c) {
 
-    switch(vertex) {
-        case 0: {
-            vert.x = xc + s;
-            vert.y = yc + s;
-            break;
-        }
-        case 1: {
-            vert.x = xc + s;
-            vert.y = yc - s;
-            break;
-        }
-        case 2: {
-            vert.x = xc - s;
-            vert.y = yc - s;
-            break;
-        }
-        case 3: {
-            vert.x = xc - s;
-            vert.y = yc + s;
-            break;
-        }
-        default: {
-            vert = Vector2::zero();
-        }
-    }
-    return vert;
+    // container for the corners
+    std::vector<Vector2> corners;
+
+    // 4 Corners
+    Vector2 p1, p2, p3, p4;
+
+    // Center of cell
+    double xc, yc, half_side;
+    c->getCentre(xc, yc);
+
+    half_side = c->getSide() * 0.5;
+
+    // Top right
+    p1.x = xc + half_side;
+    p1.y = yc + half_side;
+   
+    // Bottom right
+    p2.x = p1.x;
+    p2.y = yc - half_side;
+    
+    // Bottom left
+    p3.x = xc - half_side;
+    p3.y = p2.y;
+
+    // Top left
+    p4.x = p3.x;
+    p4.y = p1.y;
+
+    corners = {p1, p2, p3, p4};
+
+    return corners;
 }
 
 /**
@@ -498,7 +485,7 @@ void RangerFusion::lineToVertex(double range, double theta, Vector2& A, Vector2&
  * @param theta Angle to be constrained.
  */
 void RangerFusion::wrapAngle(double& theta) {
-    if(abs(theta) > M_PI) {
+    if(std::abs(theta) > M_PI) {
         theta = atan2(sin(theta), cos(theta));
     }
 }

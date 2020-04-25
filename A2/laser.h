@@ -13,6 +13,10 @@ const unsigned int LASER_OFFSET = 0;
 const std::string LASER_MODEL = "SICK-XL";
 const SensingMethod LASER_SENSOR_TYPE = POINT; 
 
+/**
+ * @brief A Laser sensor type.
+ * 
+ */
 class Laser: public Ranger
 {
     public:

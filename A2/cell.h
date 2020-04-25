@@ -8,7 +8,7 @@ typedef enum {
 } State; /*!< Available cell states*/
 
 const double MAP_SIZE = 10.0;/*!< Default map size [m] to draw cells from*/
-const double DEFAULT_CELL_SIZE = 0.1;/*!< Default cell size [m]*/
+const double DEFAULT_CELL_SIZE = 1;/*!< Default cell size [m]*/
 
 /**
 @class Cell

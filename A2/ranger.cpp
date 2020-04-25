@@ -6,7 +6,7 @@
  */
 Ranger::Ranger(){
     // create a normal distribution with mean 4.0 and stddev 5.0
-    range_distribution = new std::normal_distribution<double>(4.0,5.0);
+    range_distribution = new std::normal_distribution<double>(DATA_MEAN, DATA_STDEV);
 
     // generate unique seed
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();

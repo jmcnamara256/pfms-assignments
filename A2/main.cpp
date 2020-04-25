@@ -130,9 +130,6 @@ int main () {
                 std::cout << c->getState() << "\t";
             }
             std::cout << std::endl;
-
-            //outputCellData(cells);      
-            //outputRawData(fusion.getRawRangeData(), rangers);
          
             // Update output time
             last_output = Clock::now();
@@ -237,11 +234,12 @@ void outputRawData(std::vector<std::vector<double>> data, std::vector<RangerInte
         }else {
             std::cout << names.at(name_counter) << " = [" << std::endl;
             for(int i = 0; i < data.at(2).size(); ++i) {
-
-            std::cout << data.at(2).at(i) << ", " << sensor->getOffset() + sensor->getAngularResolution() * i << ";" << std::endl;
+                std::cout << data.at(2).at(i) << ", " << sensor->getOffset() + (int)sensor->getAngularResolution() * i << ";" << std::endl;
             }
             std::cout << "]" << std::endl;
         }
+        
+        
         name_counter++;
         if (name_counter > 3) {
             return;

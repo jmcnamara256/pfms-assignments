@@ -6,9 +6,17 @@
 #include <sstream>
 #include <random>
 #include <chrono>
-#include <math.h>
+#include <cmath>
 
 
+const double DATA_MEAN = 4.0;
+const double DATA_STDEV = 5.0;
+
+
+/**
+ * @brief Parent Class for range-finding sensor types. Provides basic get/set functionality, and data generation methods.
+ * 
+ */
 class Ranger: public RangerInterface
 {
     public:

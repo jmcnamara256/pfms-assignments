@@ -1,0 +1,28 @@
+/*!
+
+*/
+
+// without this gap between two doxygen definition, the last group does not get
+// populated properly for some reason.
+
+/*!
+@mainpage Assignment 2: Utilising Abstraction for a Range of Sensor Classes
+
+Simulates the generation of data from several sensor(rangers) types, and performs data fusion.
+
+@section doc_sensors Rangers
+Rangers represent and simulate various types of rangefinding sensors. Defined in a static library ranger_lib. Two specific sensors are created, Sonar and Laser. Both inherit from Ranger, a base class for sensors, which may be extended for any number of similar sensors. The basic interface functions for rangers are defined in RangerInterface.
+
+@section doc_fusion Fusion
+Fusion is the operation of combining the sensor readings with a list of 'Cells'. A Cell is a square defined in the space the sensors operate. They are used to simulate how the various sensors will interact with objects.
+
+@subsection doc_note Note: vector2
+Vector2 is a lightweight 2D vector header only class also defined in ranger_lib. It is used to assist in fusion calculations. Please ensure it is kept in the same directory as the other source files.
+
+
+
+@n By Jesse McNamara
+@n 1290 5749
+@n jesse.mcnamara@student.uts.edu.au
+
+*/
