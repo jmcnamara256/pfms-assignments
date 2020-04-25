@@ -1,0 +1,19 @@
+# Build Directories
+build/
+*-build/
+build-*/
+
+# QT Build Artifacts
+CMakeLists.txt.use*
+
+#VS Code Artifacts
+ipch/
+.vscode/
+
+# MATLAB 
+*.m~
+
+#doxy
+html/
+Doxyfile
+*.bak
