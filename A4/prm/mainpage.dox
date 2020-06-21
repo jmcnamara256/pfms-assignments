@@ -1,0 +1,64 @@
+/*!
+@mainpage Assignment 4: Individual Project - Probabilistic Road-Map
+
+@section doc_structure Structure & Functionality
+The probabilistic roadmap node (prm) is used to generate a path of ROS poses to connect a start and end point.
+This is done by generating random points within the configuration space, and attempting to connect them to form a short path.
+
+@subsection doc_subs Subscribers
+The prm node subscribes to three (3) ROS topics and one (1) ROS service to get info about the environment.
+
+1. robot_0/odom             - The curent pose of the robot. This is used as the starting point for any prm path calculation.
+2. map_image/full           - A greyscale image of an occupancy grid, generated from the laser scan readings. This is the working environment to make a path in.
+3. move_base_simple/goal    - A goal request message published by rviz when creating a 2D nav goal.
+4. request_goal             - A goal request service published from the command line via a ROS service call.
+
+Input 3 and 4 are the two methods a goal for the prm path calculation can be provided. Both can be used interchangeably.
+
+@subsection doc_pubs Publishers
+The prm node publishes messages on two (2) ROS topics.
+
+1. /path        - A pose array of the poses that make up the produced path. Order is first to last.
+2. /test/image  - Image transport message. Image shows the configuration space overlayed with the prm nodes and path info.
+
+@subsection doc_classes Classes
+The data flow is as follows:
+\verbatim
+    Ros Stage <-> PrmInterface <-> Prm <-> Graph       
+\endverbatim
+
+The PrmInterface class acts as an interface with ros and the user. It subscribes/publishes to all topics mentioned above.
+@n When a goal is requested, the input is checked than passed to the Prm class. This does the all the path calculation and
+@n returns the path to the interface. The interface then handles publishing the path and image.
+
+@section doc_make How to Build Prm
+The package can be made with catkin_make, from the catkin workspace root directory:
+\verbatim
+    catkin_make     
+\endverbatim
+The unit tests can be made from the same location with:
+\verbatim
+    catkin_make tests      
+\endverbatim
+
+@section doc_run How to Run Prm
+The basic command to start the Prm node is:
+\verbatim
+    rosrun prm prm      
+\endverbatim
+The maximum connection distance between nodes can be input as a parameter when running the node from the command line as follows:
+\verbatim
+    rosrun prm prm _dist:=500     
+\endverbatim
+With a maximum SQUARED connection distance of 500 in PIXELS. If no maximum distance is set, a default of 600 is used.
+@n The prm unit tests can be run with the command:
+\verbatim
+    rosrun prm prm-test      
+\endverbatim
+
+
+@n By Jesse McNamara
+@n 1290 5749
+@n jesse.mcnamara@student.uts.edu.au
+
+*/
